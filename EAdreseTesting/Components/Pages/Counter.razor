@@ -1,0 +1,125 @@
+﻿@page "/counter"
+@rendermode InteractiveServer
+@using System.Security.Cryptography.X509Certificates;
+@using System.ServiceModel;
+@inject MessageService MessageService
+@inject IJSRuntime JS
+@inject ILogger<Counter> Logger
+
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+
+<h3>Message Sender</h3>
+
+<label>From: <input @bind="MessageFrom" /></label>
+<br />
+<label>To: <input @bind="MessageTo" /></label>
+<br />
+<label>Title: <input @bind="MessageTitle" /></label>
+<br />
+
+<button @onclick="Test">Send Message</button>
+
+@if (ResultMessage != null)
+{
+    <p>---------------</p>
+    <p>@ResultMessage</p>
+    <p>---------------</p>
+}
+@if (ValidationResults != null)
+{
+    <p>ValidationResultOfMessageXm1l</p>
+    <pre>@ValidationResults</pre>
+    <p>---------------</p>
+}
+@if (MessageXml1 != null)
+{
+    <p>---------------</p>
+    <pre>@((MarkupString)MessageXml1)</pre>
+    <p>---------------</p>
+}
+@if (MessageXml2 != null)
+{
+    <p>---------------</p>
+    <pre>@((MarkupString)MessageXml2)</pre>
+    <p>---------------</p>
+}
+
+@if (MessageId != null)
+{
+    <p>---------------</p>
+    <p>@MessageId</p>
+    <p>---------------</p>
+}
+
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private string MessageFrom { get; set; } = "mail@domain1";
+    private string MessageTo { get; set; } = "mail@domain2";
+    private string MessageTitle { get; set; } = "Document simple title";
+    private string ResultMessage { get; set; } = "Temp";
+    private string MessageXml1 = "";
+    private string MessageXml2 = "";
+    private string MessageXml3 = "";
+    private string MessageId = "";
+
+    private string ValidationResults = "";
+
+    private async Task ValidateMessage()
+    {
+    }
+
+    // private void SendMessage()
+    // {
+    //     ResultMessage = "Temp In Process";
+    //     StateHasChanged(); // Update UI immediately
+
+    //     // Simulate completion message
+    //     ResultMessage = "Message sent successfully!";
+    //     StateHasChanged(); // Update UI again
+    // }
+
+
+    private async Task Test()
+    {
+        ResultMessage = "Temp In Process";
+
+        var result = await MessageService.SendMessageAsync(MessageFrom, MessageTo, MessageTitle);
+        ResultMessage = result ? "Message sent successfully!" : "Message sending failed.";
+        await JS.InvokeVoidAsync("alert", ResultMessage + "\n" + result);
+
+        MessageXml1 = MessageService.PrepareMessage();
+        // Path to the XSD file
+        // string xsdFilePath = "https://ivis.eps.gov.lv/XMLSchemas/100001/DIV/v1-0/DIVEnvelope.xsd",
+        // string xsdFilePath = "https://ivis.eps.gov.lv/XMLSchemas/100001/DIV/v1-0/20120525_133755/DIVEnvelope.xsd",
+        //string xsdFilePath = "https://ivis.eps.gov.lv/XMLSchemas/100001/DIV/v1-0/",
+        // Validate the XML content
+        ValidationResults = MessageService.ValidateXml(
+            MessageXml1,
+            "https://ivis.eps.gov.lv/XMLSchemas/100001/DIV/v1-0/DivDataTypes.xsd",
+            "https://ivis.eps.gov.lv/XMLSchemas/100001/DIV/v1-0/DIVEnvelope.xsd"
+        );
+
+        MessageXml1 = MessageService.FormatXmlWithColor(MessageService.PrepareMessage());
+        MessageXml2 = MessageService.FormatXmlWithColor(MessageService.GenerateMessageXml());
+
+        MessageId = MessageService.TestErrorHandling();
+
+
+    }
+
+}

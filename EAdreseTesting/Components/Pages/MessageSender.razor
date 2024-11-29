@@ -1,0 +1,51 @@
+﻿@page "/message-sender"
+
+<h3>Message Sender</h3>
+
+<label>From: <input @bind="MessageFrom" /></label>
+<br />
+<label>To: <input @bind="MessageTo" /></label>
+<br />
+<label>Title: <input @bind="MessageTitle" /></label>
+<br />
+
+<button @onclick="SendMessage">Send Message</button>
+
+@if (ResultMessage != null)
+{
+    <p>---------------</p>
+    <p>@ResultMessage</p>
+    <p>---------------</p>
+}
+
+@code {
+    private string MessageFrom { get; set; } = "mail@domain1";
+    private string MessageTo { get; set; } = "mail@domain2";
+    private string MessageTitle { get; set; } = "Document simple title";
+    private string ResultMessage { get; set; } = "Temp";
+
+    private void SendMessage()
+    {
+        ResultMessage = "Temp In Process";
+        StateHasChanged(); // Update UI immediately
+
+        // Simulate completion message
+        ResultMessage = "Message sent successfully!";
+        StateHasChanged(); // Update UI again
+    }
+
+    // private async Task SendMessage()
+    // {
+    //     ResultMessage = "Temp In Process";
+    //     StateHasChanged(); // Force UI to update
+
+    //     await Task.Delay(500); // Simulate async work to allow asynchronous flow
+
+    //     // Update ResultMessage to simulate the result of the async work
+    //     ResultMessage = "Message sent successfully!";
+    //     //var result = await MessageService.SendMessageAsync(MessageFrom, MessageTo, MessageTitle);
+    //     //ResultMessage = result ? "Message sent successfully!" : "Message sending failed.";
+    //     // Use JavaScript interop to show the alert
+    //     //await JS.InvokeVoidAsync("alert", ResultMessage);
+    // }
+}
